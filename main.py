@@ -54,6 +54,8 @@ user_item_matrix = train_df.pivot(index='userId', columns='movieId', values='rat
 
 
 
+
+
 # Step 1: KMeans clustering
 n_clusters = 10  # You can tune this BUNUN İÇİN ELBOW METHOD KULLANILABİLİR
 kmeans = KMeans(n_clusters=n_clusters, random_state=42)
@@ -69,6 +71,7 @@ def recommend_movies(user_id, top_n=5):
 
     user_cluster = user_item_matrix.loc[user_id, 'cluster']
     cluster_users = user_item_matrix[user_item_matrix['cluster'] == user_cluster].drop(columns='cluster')
+    
     if user_id not in cluster_users.index:
         return []
 
@@ -153,6 +156,8 @@ If the intersection of actual(test set) and predicted sets is non-empty ( at lea
 """
 
 #TEST
+
+k_test=50
 precision_scores = []
 recall_scores = []
 hit_scores = []
@@ -161,11 +166,11 @@ test_users = test_df['userId'].unique()
 
 for user_id in test_users:
     actual = test_df[test_df['userId'] == user_id]['movieId'].tolist()
-    predicted = recommend_movies(user_id, top_n=10)
+    predicted = recommend_movies(user_id, top_n=k_test)
 
     if predicted:
-        precision_scores.append(precision_at_k(actual, predicted, k=10))
-        recall_scores.append(recall_at_k(actual, predicted, k=10))
+        precision_scores.append(precision_at_k(actual, predicted, k=k_test))
+        recall_scores.append(recall_at_k(actual, predicted, k=k_test))
         hit_scores.append(hit_rate(actual, predicted))
 
 #Results
