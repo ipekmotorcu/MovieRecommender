@@ -10,15 +10,19 @@ First, users are grouped based on similar rating behaviors using K-Means.
 Then, for a target user, the system finds similar users within the same cluster and recommends movies based on their ratings.
 """
 """
-Test-> user listesini test ve train diye  
+Test-> user listesini test ve train  
 Elbow method -> cluster and (AIC/BIC or Sqrt)
 
 !!!!!!
 """
-# Load data
-ratings = pd.read_csv('rating.csv')  # Make sure this file is available
+
+ratings = pd.read_csv('rating.csv')  
+movies = pd.read_csv('movie.csv')
+
+
 #bunlar test için
 """
+print(movies.head())
 print(ratings.head())
 print(ratings.dtypes)
 print(ratings.describe())
@@ -32,7 +36,7 @@ ratings_subset = ratings[ratings['userId'].isin(sampled_users)]#seçilmiş userl
 train_data = []
 test_data = []
 
-# Now pivot this subset
+
 for user_id in ratings_subset['userId'].unique():
     user_ratings = ratings_subset[ratings_subset['userId'] == user_id]
     if len(user_ratings) >= 5:
@@ -99,6 +103,32 @@ rated_movies= user_rated[user_rated == 1].index
 print("Rated Movies:",rated_movies)
 print("Recommended Movie IDs:", recommended_movies)
 """
+#random bir user'ın test setindeki gerçekten beğendiği film isimlerini ve önerilen film isimlerini gösteriyor
+random_user = random.choice(user_item_matrix.index.tolist())#bir seed yok her run'da farklı bir user'a bakıyor iyi bir sonuç gelirse o id'yi unutmayalım
+print(f"\n Random test user: {random_user}")
+
+recommended_ids = recommend_movies(user_id=random_user, top_n=10)
+recommended_titles = movies[movies['movieId'].isin(recommended_ids)][['movieId', 'title']]
+
+actual_ids = test_df[test_df['userId'] == random_user]['movieId'].tolist()
+actual_titles = movies[movies['movieId'].isin(actual_ids)][['movieId', 'title']]
+
+#ikisinde de olan filmler(Hit olanlar aslında)
+matched_ids = list(set(recommended_ids) & set(actual_ids))
+matched_titles = movies[movies['movieId'].isin(matched_ids)][['movieId', 'title']]
+
+
+print("\n Actual (Test Set) Movies:")
+print(actual_titles)
+
+print("\n Recommended Movies:")
+print(recommended_titles)
+
+print("\n Matched (Correctly Recommended) Movies:")
+print(matched_titles if not matched_titles.empty else "None")
+
+
+
 #Metrics
 
 def precision_at_k(actual, predicted, k):
